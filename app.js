@@ -497,6 +497,16 @@ function bindEvents() {
     renderAll();
   });
 
+  document.querySelectorAll('[data-picker-panel="date"]').forEach((popover) => {
+    const input = popover.closest('.custom-picker-group')?.querySelector('input[type="date"]');
+    if (input) initCustomDatePicker(input);
+  });
+
+  document.querySelectorAll('[data-picker-panel="time"]').forEach((popover) => {
+    const input = popover.closest('.custom-picker-group')?.querySelector('input[type="time"]');
+    if (input) initCustomTimePicker(input);
+  });
+
   refs.classForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const formData = new FormData(refs.classForm);
@@ -1085,7 +1095,7 @@ function renderSchedule() {
             ${buildTimeSlots()}
             ${classesForDay
               .map((item) => {
-                const top = getTimePosition(item.startTime, 7 * 60, slotHeight);
+                const top = getTimePosition(item.startTime, 0, slotHeight);
                 const height = Math.max((Number(item.duration || 0) / 30) * slotHeight, 48);
                 const student = getStudentById(item.studentId);
                 const color = item.attendance === 'Cancelled' ? 'rgba(195, 90, 90, 0.18)' : item.attendance === 'Present' ? 'rgba(115, 197, 167, 0.25)' : 'rgba(166, 214, 232, 0.22)';
@@ -1126,10 +1136,10 @@ function renderSchedule() {
 
       const rect = track.getBoundingClientRect();
       const clickY = event.clientY - rect.top;
-      const totalMinutes = (22 - 7) * 60;
+      const totalMinutes = 24 * 60;
       const minutesFromStart = Math.max(0, Math.min(totalMinutes, Math.round((clickY / rect.height) * totalMinutes)));
       const snapped = Math.round(minutesFromStart / 30) * 30;
-      const slotMinutes = Math.min(22 * 60, 7 * 60 + snapped);
+      const slotMinutes = Math.min(totalMinutes, snapped);
       const hour = String(Math.floor(slotMinutes / 60)).padStart(2, '0');
       const minute = String(slotMinutes % 60).padStart(2, '0');
       openClassModal(null, { date: track.dataset.date, startTime: `${hour}:${minute}` });
@@ -1827,6 +1837,212 @@ function closeModal(modal) {
   studentModalEditingId = null;
 }
 
+function formatCustomDate(value) {
+  if (!value) return '';
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).format(date);
+}
+
+function formatCustomTime(value) {
+  if (!value) return '';
+  const [hours, minutes] = String(value).split(':');
+  const hour = Number(hours || 0);
+  const minute = Number(minutes || 0);
+  const suffix = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = ((hour + 11) % 12) + 1;
+  return `${String(displayHour).padStart(2, '0')}:${String(minute).padStart(2, '0')} ${suffix}`;
+}
+
+function convertTimeTo24Hour(hour, minute, period) {
+  let totalHour = Number(hour || 0);
+  if (period === 'AM' && totalHour === 12) totalHour = 0;
+  if (period === 'PM' && totalHour !== 12) totalHour += 12;
+  return `${String(totalHour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+function updateCustomDateField(dateInput) {
+  const display = dateInput.parentElement.querySelector('[data-date-display]');
+  if (display) {
+    display.textContent = formatCustomDate(dateInput.value);
+  }
+}
+
+function updateCustomTimeField(timeInput) {
+  const display = timeInput.parentElement.querySelector('[data-time-display]');
+  if (display) {
+    display.textContent = formatCustomTime(timeInput.value);
+  }
+}
+
+function initCustomDatePicker(dateInput) {
+  const group = dateInput.parentElement;
+  const trigger = group.querySelector('[data-picker="date"]');
+  const popover = group.querySelector('[data-picker-panel="date"]');
+  const monthSelect = popover.querySelector('.date-picker-month');
+  const yearSelect = popover.querySelector('.date-picker-year');
+  const grid = popover.querySelector('.date-picker-grid');
+
+  const yearOptions = Array.from({ length: 201 }, (_, index) => 1900 + index);
+  yearSelect.innerHTML = yearOptions.map((year) => `<option value="${year}">${year}</option>`).join('');
+
+  const syncDatePicker = () => {
+    const value = dateInput.value || formatDateInput(new Date());
+    const selectedDate = new Date(`${value}T00:00:00`);
+    const activeMonth = selectedDate.getMonth();
+    const activeYear = selectedDate.getFullYear();
+    monthSelect.value = String(activeMonth);
+    yearSelect.value = String(activeYear);
+
+    const firstDay = new Date(activeYear, activeMonth, 1);
+    const lastDay = new Date(activeYear, activeMonth + 1, 0);
+    const startIndex = firstDay.getDay();
+    const totalDays = lastDay.getDate();
+    const cells = [];
+
+    for (let index = 0; index < startIndex; index += 1) {
+      cells.push('<button type="button" class="date-picker-cell muted" disabled></button>');
+    }
+
+    for (let day = 1; day <= totalDays; day += 1) {
+      const cellDate = new Date(activeYear, activeMonth, day);
+      const localDateKey = `${cellDate.getFullYear()}-${String(cellDate.getMonth() + 1).padStart(2, '0')}-${String(cellDate.getDate()).padStart(2, '0')}`;
+      const isSelected = localDateKey === value;
+      cells.push(`<button type="button" class="date-picker-cell ${isSelected ? 'selected' : ''}" data-day="${day}">${day}</button>`);
+    }
+
+    grid.innerHTML = cells.join('');
+    grid.querySelectorAll('.date-picker-cell[data-day]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const day = Number(button.dataset.day || 0);
+        const month = Number(monthSelect.value);
+        const year = Number(yearSelect.value);
+        const isoDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        dateInput.value = isoDate;
+        dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+        updateCustomDateField(dateInput);
+        popover.classList.add('hidden');
+      });
+    });
+  };
+
+  monthSelect.addEventListener('change', syncDatePicker);
+  yearSelect.addEventListener('change', syncDatePicker);
+
+  trigger.addEventListener('click', () => {
+    syncDatePicker();
+    popover.classList.toggle('hidden');
+  });
+
+  popover.querySelector('.date-picker-close').addEventListener('click', () => popover.classList.add('hidden'));
+  popover.querySelector('.date-picker-confirm').addEventListener('click', () => {
+    if (!dateInput.value) {
+      dateInput.value = formatDateInput(new Date());
+    }
+    dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+    updateCustomDateField(dateInput);
+    popover.classList.add('hidden');
+  });
+
+  updateCustomDateField(dateInput);
+}
+
+function initCustomTimePicker(timeInput) {
+  const group = timeInput.parentElement;
+  const trigger = group.querySelector('[data-picker="time"]');
+  const popover = group.querySelector('[data-picker-panel="time"]');
+  const hoursList = popover.querySelector('[data-time-hours]');
+  const minutesList = popover.querySelector('[data-time-minutes]');
+  const periodList = popover.querySelector('[data-time-period]');
+
+  const hourOptions = ['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  const minuteOptions = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+  const periodOptions = ['AM', 'PM'];
+
+  let selectedHour = '8';
+  let selectedMinute = '30';
+  let selectedPeriod = 'AM';
+
+  const refreshDraftFromInput = () => {
+    if (!timeInput.value) {
+      selectedHour = '8';
+      selectedMinute = '30';
+      selectedPeriod = 'AM';
+      return;
+    }
+
+    const [hour, minute] = String(timeInput.value).split(':');
+    const numericHour = Number(hour || 8);
+    const numericMinute = Number(minute || 30);
+    selectedHour = String(((numericHour + 11) % 12) + 1);
+    selectedMinute = String(numericMinute).padStart(2, '0');
+    selectedPeriod = numericHour >= 12 ? 'PM' : 'AM';
+  };
+
+  const renderTimeOptions = () => {
+    hoursList.innerHTML = hourOptions.map((hourOption) => {
+      const isSelected = hourOption === selectedHour;
+      return `<button type="button" class="time-picker-option ${isSelected ? 'selected' : ''}" data-hour="${hourOption}">${hourOption}</button>`;
+    }).join('');
+
+    minutesList.innerHTML = minuteOptions.map((minuteOption) => {
+      const isSelected = minuteOption === selectedMinute;
+      return `<button type="button" class="time-picker-option ${isSelected ? 'selected' : ''}" data-minute="${minuteOption}">${minuteOption}</button>`;
+    }).join('');
+
+    periodList.innerHTML = periodOptions.map((periodOption) => {
+      const isSelected = periodOption === selectedPeriod;
+      return `<button type="button" class="time-picker-option ${isSelected ? 'selected' : ''}" data-period="${periodOption}">${periodOption}</button>`;
+    }).join('');
+
+    hoursList.querySelectorAll('[data-hour]').forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedHour = button.dataset.hour;
+        renderTimeOptions();
+      });
+    });
+
+    minutesList.querySelectorAll('[data-minute]').forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedMinute = button.dataset.minute;
+        renderTimeOptions();
+      });
+    });
+
+    periodList.querySelectorAll('[data-period]').forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedPeriod = button.dataset.period;
+        renderTimeOptions();
+      });
+    });
+  };
+
+  refreshDraftFromInput();
+
+  trigger.addEventListener('click', () => {
+    refreshDraftFromInput();
+    renderTimeOptions();
+    popover.classList.toggle('hidden');
+  });
+
+  popover.querySelector('.time-picker-cancel').addEventListener('click', () => popover.classList.add('hidden'));
+  popover.querySelector('.time-picker-ok').addEventListener('click', () => {
+    const hour24 = Number(selectedHour || 8);
+    const period = selectedPeriod || 'AM';
+    const minuteValue = Number(selectedMinute || 0);
+    let valueHour = hour24;
+    if (period === 'AM' && valueHour === 12) valueHour = 0;
+    if (period === 'PM' && valueHour !== 12) valueHour += 12;
+    const value = `${String(valueHour).padStart(2, '0')}:${String(minuteValue).padStart(2, '0')}`;
+    timeInput.value = value;
+    timeInput.dispatchEvent(new Event('change', { bubbles: true }));
+    updateCustomTimeField(timeInput);
+    popover.classList.add('hidden');
+  });
+
+  updateCustomTimeField(timeInput);
+}
+
 function openClassModal(classId = null, defaults = {}) {
   classModalEditingId = classId;
   refs.classForm.reset();
@@ -1843,6 +2059,8 @@ function openClassModal(classId = null, defaults = {}) {
   refs.classForm.querySelector('[name="classType"]').value = 'Regular';
   refs.classForm.querySelector('[name="startTime"]').value = defaultTime;
   refs.classForm.querySelector('[name="repeatCount"]').value = '0';
+  updateCustomDateField(refs.classForm.querySelector('[name="date"]'));
+  updateCustomTimeField(refs.classForm.querySelector('[name="startTime"]'));
 
   if (classId) {
     const currentClass = appState.classes.find((entry) => entry.id === classId);
@@ -2135,7 +2353,7 @@ function getTimePosition(startTime, dayStartMinutes, slotHeight) {
 }
 
 function buildTimeSlots(includeLabels = false) {
-  const startHour = 6;
+  const startHour = 0;
   const endHour = 23;
   const slots = [];
   for (let hour = startHour; hour <= endHour; hour += 1) {

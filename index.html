@@ -195,8 +195,44 @@
             <select id="paymentStudentFilter" aria-label="Student payment filter">
               <option value="all">All students</option>
             </select>
-            <input id="paymentFromDate" type="date" aria-label="From date" />
-            <input id="paymentToDate" type="date" aria-label="To date" />
+            <div class="custom-picker-group compact-filter-picker">
+              <input id="paymentFromDate" type="date" aria-label="From date" hidden />
+              <button type="button" class="custom-picker-trigger" data-picker="date" aria-label="Choose from date">
+                <span class="custom-picker-value" data-date-display>mm/dd/yyyy</span>
+                <span class="custom-picker-icon">🗓</span>
+              </button>
+              <div class="custom-picker-popover hidden" data-picker-panel="date">
+                <div class="date-picker-header">
+                  <select class="date-picker-month" aria-label="Select month"></select>
+                  <select class="date-picker-year" aria-label="Select year"></select>
+                </div>
+                <div class="date-picker-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+                <div class="date-picker-grid"></div>
+                <div class="date-picker-actions">
+                  <button type="button" class="date-picker-close secondary-button small-button">Close</button>
+                  <button type="button" class="date-picker-confirm primary-button small-button">Confirm</button>
+                </div>
+              </div>
+            </div>
+            <div class="custom-picker-group compact-filter-picker">
+              <input id="paymentToDate" type="date" aria-label="To date" hidden />
+              <button type="button" class="custom-picker-trigger" data-picker="date" aria-label="Choose to date">
+                <span class="custom-picker-value" data-date-display>mm/dd/yyyy</span>
+                <span class="custom-picker-icon">🗓</span>
+              </button>
+              <div class="custom-picker-popover hidden" data-picker-panel="date">
+                <div class="date-picker-header">
+                  <select class="date-picker-month" aria-label="Select month"></select>
+                  <select class="date-picker-year" aria-label="Select year"></select>
+                </div>
+                <div class="date-picker-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+                <div class="date-picker-grid"></div>
+                <div class="date-picker-actions">
+                  <button type="button" class="date-picker-close secondary-button small-button">Close</button>
+                  <button type="button" class="date-picker-confirm primary-button small-button">Confirm</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div id="paymentBreakdown" class="payment-breakdown card"></div>
@@ -302,163 +338,113 @@
         </section>
 
         <section id="settings-view" class="view" aria-label="Settings">
-          <div class="page-header">
+          <div class="page-header settings-page-header">
             <div>
-              <p class="eyebrow">Settings</p>
-              <h2>Teacher Profile</h2>
+              <h2>Settings</h2>
             </div>
           </div>
 
-          <form id="settingsForm" class="card settings-card">
-            <div class="settings-grid">
-              <label class="full-span profile-upload-field">
-                Profile picture
-                <div class="profile-upload-row">
-                  <div class="profile-preview" id="profileImagePreview" aria-live="polite">
-                    <span>V</span>
-                  </div>
-                  <div class="profile-upload-controls">
-                    <input id="profileImageInput" type="file" accept="image/*" />
-                    <button type="button" class="secondary-button small-button" id="profileImageClearBtn">Remove photo</button>
-                  </div>
-                </div>
-              </label>
-              <label>
-                Teacher name
-                <input id="teacherNameInput" type="text" />
-              </label>
-              <label>
-                Dashboard title
-                <input id="dashboardTitleInput" type="text" />
-              </label>
-              <label class="full-span">
-                Quote
-                <textarea id="settingsQuoteInput" rows="3"></textarea>
-              </label>
-              <label class="full-span">
-                Monthly milestone reminder
-                <div class="reminder-picker-row">
-                  <div class="reminder-choice-group">
-                    <span class="reminder-choice-label">Students</span>
-                    <div id="milestoneStudentCheckboxes" class="reminder-checklist"></div>
-                  </div>
-                  <div class="reminder-choice-group">
-                    <span class="reminder-choice-label">Thresholds</span>
-                    <div id="milestoneThresholdCheckboxes" class="reminder-checklist">
-                      <label class="reminder-choice-option"><input type="checkbox" name="milestoneThresholdCheckbox" value="15" /> 15 classes</label>
-                      <label class="reminder-choice-option"><input type="checkbox" name="milestoneThresholdCheckbox" value="20" /> 20 classes</label>
-                      <label class="reminder-choice-option"><input type="checkbox" name="milestoneThresholdCheckbox" value="30" /> 30 classes</label>
+          <form id="settingsForm" class="settings-shell">
+            <div class="settings-panel-grid">
+              <section class="settings-panel appearance-panel" aria-label="Appearance and profile">
+                <h3>Appearance &amp; profile</h3>
+
+                <div class="settings-form-grid">
+                  <label class="settings-field">
+                    <span>Teacher name</span>
+                    <input id="teacherNameInput" type="text" value="Vanessa" />
+                  </label>
+
+                  <label class="settings-field">
+                    <span>Teaching label</span>
+                    <input id="teacherRoleInput" type="text" value="Private Class Teacher" />
+                  </label>
+
+                  <label class="settings-field">
+                    <span>Theme</span>
+                    <select id="themeInput" class="settings-select">
+                      <option value="soft">Mint Study</option>
+                      <option value="sage">Sage</option>
+                      <option value="lavender">Lavender</option>
+                      <option value="midnight">Midnight</option>
+                      <option value="peach">Peach</option>
+                      <option value="mint">Mint</option>
+                      <option value="ocean">Ocean</option>
+                    </select>
+                  </label>
+
+                  <label class="settings-field">
+                    <span>Teacher timezone</span>
+                    <input id="timezoneInput" type="text" value="Asia/Manila" />
+                  </label>
+
+                  <label class="settings-field profile-upload-field">
+                    <span>Profile image</span>
+                    <div class="profile-upload-row">
+                      <div class="profile-preview" id="profileImagePreview" aria-live="polite">
+                        <span>V</span>
+                      </div>
+                      <div class="profile-upload-controls">
+                        <input id="profileImageInput" type="file" accept="image/*" />
+                        <button type="button" class="secondary-button small-button" id="profileImageClearBtn">Choose File</button>
+                      </div>
                     </div>
-                  </div>
-                  <button type="button" class="secondary-button" id="addMilestoneReminderBtn">Add reminder</button>
-                </div>
-              </label>
-              <div id="milestoneReminderList" class="full-span reminder-list"></div>
-              <label>
-                Default currency
-                <select id="defaultCurrencyInput" class="compact-select">
-                  <option value="PHP">PHP</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="SGD">SGD</option>
-                  <option value="AUD">AUD</option>
-                </select>
-              </label>
-              <label>
-                PHP rate
-                <input id="phpRateInput" type="number" step="0.01" min="0" />
-              </label>
-
-              <div class="full-span exchange-rate-card card">
-                <div class="exchange-rate-header">
-                  <div>
-                    <h3>PHP exchange rates</h3>
-                    <p>Rates recalculate pending records only. Paid records retain their locked snapshot.</p>
-                  </div>
-                </div>
-                <div class="exchange-rate-controls">
-                  <label>
-                    <span>CURRENCY</span>
-                    <select id="exchangeRateCurrencyInput" class="compact-select"></select>
-                  </label>
-                  <label class="exchange-rate-value-field">
-                    <span>RATE</span>
-                    <input id="exchangeRateValueInput" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="1.00" />
                   </label>
                 </div>
-                <button type="button" class="primary-button" id="saveExchangeRateBtn">Save rate</button>
-                <div id="exchangeRateList" class="exchange-rate-list"></div>
-              </div>
 
-              <label>
-                Theme
-                <select id="themeInput" class="compact-select">
-                  <option value="soft">Soft</option>
-                  <option value="sage">Sage</option>
-                  <option value="lavender">Lavender</option>
-                  <option value="midnight">Midnight</option>
-                  <option value="peach">Peach</option>
-                  <option value="mint">Mint</option>
-                  <option value="ocean">Ocean</option>
-                  <option value="rosewood">Rosewood</option>
-                  <option value="sunset">Sunset</option>
-                  <option value="plum">Plum</option>
-                  <option value="sky">Sky</option>
-                  <option value="forest">Forest</option>
-                  <option value="ember">Ember</option>
-                  <option value="lilac">Lilac</option>
-                  <option value="slate">Slate</option>
-                  <option value="golden">Golden</option>
-                  <option value="coral">Coral</option>
-                  <option value="berry">Berry</option>
-                  <option value="aqua">Aqua</option>
-                  <option value="sunrise">Sunrise</option>
-                  <option value="violet">Violet</option>
-                  <option value="cocoa">Cocoa</option>
-                  <option value="onyx">Onyx</option>
-                </select>
-              </label>
-              <label>
-                Font
-                <select id="fontInput" class="compact-select">
-                  <option value="serif">Serif</option>
-                  <option value="sans">Sans</option>
-                  <option value="modern">Modern</option>
-                  <option value="mono">Mono</option>
-                  <option value="classic">Classic</option>
-                  <option value="display">Display</option>
-                  <option value="editorial">Editorial</option>
-                  <option value="rounded">Rounded</option>
-                  <option value="slab">Slab</option>
-                  <option value="condensed">Condensed</option>
-                  <option value="elegant">Elegant</option>
-                  <option value="handwriting">Handwriting</option>
-                  <option value="futuristic">Futuristic</option>
-                  <option value="book">Book</option>
-                  <option value="geometric">Geometric</option>
-                  <option value="playfair">Playfair</option>
-                  <option value="inter">Inter</option>
-                  <option value="cursive">Cursive</option>
-                  <option value="lora">Lora</option>
-                  <option value="poppins">Poppins</option>
-                  <option value="montserrat">Montserrat</option>
-                  <option value="quicksand">Quicksand</option>
-                  <option value="raleway">Raleway</option>
-                  <option value="nunito">Nunito</option>
-                </select>
-              </label>
-              <label>
-                Teacher timezone
-                <input id="timezoneInput" type="text" />
-              </label>
-              <label class="full-span">
-                Reminder settings
-                <textarea id="reminderSettingsInput" rows="3"></textarea>
-              </label>
+                <div class="settings-actions compact-actions">
+                  <button type="submit" class="primary-button">Save preferences</button>
+                </div>
+              </section>
+
+              <section class="settings-panel exchange-panel" aria-label="PHP exchange rates">
+                <h3>PHP exchange rates</h3>
+                <p class="panel-note">Rates recalculate pending records only. Paid records retain their locked snapshot.</p>
+
+                <div class="exchange-rate-header-row">
+                  <span class="mini-label">Currency</span>
+                  <span class="mini-label right">1 unit in PHP</span>
+                </div>
+
+                <div class="exchange-rate-control">
+                  <select id="exchangeRateCurrencyInput" class="settings-select wide-select"></select>
+                  <input id="exchangeRateValueInput" type="hidden" />
+                </div>
+
+                <div id="exchangeRateList" class="exchange-rate-list" aria-live="polite"></div>
+              </section>
             </div>
 
-            <div class="settings-actions">
-              <button type="submit" class="primary-button">Save settings</button>
+            <section class="settings-panel reminder-panel" aria-label="Monthly class reminders">
+              <h3>Monthly class reminders</h3>
+              <p class="panel-note">Enable reminders for students who should be notified at 15, 20, and 30 Present classes in the calendar month.</p>
+
+              <div class="reminder-picker-row">
+                <div class="reminder-choice-group">
+                  <span class="reminder-choice-label">Students</span>
+                  <div id="milestoneStudentCheckboxes" class="reminder-checklist"></div>
+                </div>
+                <div class="reminder-choice-group">
+                  <span class="reminder-choice-label">Thresholds</span>
+                  <div id="milestoneThresholdCheckboxes" class="reminder-checklist">
+                    <label class="reminder-choice-option"><input type="checkbox" name="milestoneThresholdCheckbox" value="15" /> 15 classes</label>
+                    <label class="reminder-choice-option"><input type="checkbox" name="milestoneThresholdCheckbox" value="20" /> 20 classes</label>
+                    <label class="reminder-choice-option"><input type="checkbox" name="milestoneThresholdCheckbox" value="30" /> 30 classes</label>
+                  </div>
+                </div>
+                <button type="button" class="secondary-button" id="addMilestoneReminderBtn">Add reminder</button>
+              </div>
+
+              <div id="milestoneReminderList" class="reminder-list"></div>
+            </section>
+
+            <div class="hidden">
+              <input id="dashboardTitleInput" type="text" />
+              <textarea id="settingsQuoteInput"></textarea>
+              <select id="defaultCurrencyInput"></select>
+              <input id="phpRateInput" type="number" />
+              <select id="fontInput"></select>
+              <textarea id="reminderSettingsInput"></textarea>
             </div>
           </form>
         </section>
@@ -533,7 +519,25 @@
             </label>
             <label>
               Start Date
-              <input type="date" name="startDate" />
+              <div class="custom-picker-group">
+                <input type="date" name="startDate" hidden />
+                <button type="button" class="custom-picker-trigger" data-picker="date" aria-label="Choose start date">
+                  <span class="custom-picker-value" data-date-display>mm/dd/yyyy</span>
+                  <span class="custom-picker-icon">🗓</span>
+                </button>
+                <div class="custom-picker-popover hidden" data-picker-panel="date">
+                  <div class="date-picker-header">
+                    <select class="date-picker-month" aria-label="Select month"></select>
+                    <select class="date-picker-year" aria-label="Select year"></select>
+                  </div>
+                  <div class="date-picker-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+                  <div class="date-picker-grid"></div>
+                  <div class="date-picker-actions">
+                    <button type="button" class="date-picker-close secondary-button small-button">Close</button>
+                    <button type="button" class="date-picker-confirm primary-button small-button">Confirm</button>
+                  </div>
+                </div>
+              </div>
             </label>
             <label>
               Status
@@ -580,11 +584,77 @@
             </label>
             <label>
               Date
-              <input type="date" name="date" required />
+              <div class="custom-picker-group">
+                <input type="date" name="date" required hidden />
+                <button type="button" class="custom-picker-trigger" data-picker="date" aria-label="Choose date">
+                  <span class="custom-picker-value" data-date-display>09/24/2026</span>
+                  <span class="custom-picker-icon">🗓</span>
+                </button>
+                <div class="custom-picker-popover hidden" data-picker-panel="date">
+                  <div class="date-picker-header">
+                    <select class="date-picker-month" aria-label="Select month">
+                      <option value="0">January</option>
+                      <option value="1">February</option>
+                      <option value="2">March</option>
+                      <option value="3">April</option>
+                      <option value="4">May</option>
+                      <option value="5">June</option>
+                      <option value="6">July</option>
+                      <option value="7">August</option>
+                      <option value="8">September</option>
+                      <option value="9">October</option>
+                      <option value="10">November</option>
+                      <option value="11">December</option>
+                    </select>
+                    <select class="date-picker-year" aria-label="Select year"></select>
+                  </div>
+                  <div class="date-picker-weekdays">
+                    <span>Sun</span>
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                  </div>
+                  <div class="date-picker-grid"></div>
+                  <div class="date-picker-actions">
+                    <button type="button" class="date-picker-close secondary-button small-button">Close</button>
+                    <button type="button" class="date-picker-confirm primary-button small-button">Confirm</button>
+                  </div>
+                </div>
+              </div>
             </label>
             <label>
               Start Time
-              <input type="time" name="startTime" required />
+              <div class="custom-picker-group">
+                <input type="time" name="startTime" required hidden />
+                <button type="button" class="custom-picker-trigger" data-picker="time" aria-label="Choose time">
+                  <span class="custom-picker-value" data-time-display>08:30 AM</span>
+                  <span class="custom-picker-icon">◔</span>
+                </button>
+                <div class="custom-picker-popover custom-time-popover hidden" data-picker-panel="time">
+                  <div class="time-picker-header">Select Time</div>
+                  <div class="time-picker-columns">
+                    <div class="time-picker-column">
+                      <div class="time-picker-label">Hours</div>
+                      <div class="time-picker-list" data-time-hours></div>
+                    </div>
+                    <div class="time-picker-column">
+                      <div class="time-picker-label">Minutes</div>
+                      <div class="time-picker-list" data-time-minutes></div>
+                    </div>
+                    <div class="time-picker-column">
+                      <div class="time-picker-label">AM/PM</div>
+                      <div class="time-picker-list" data-time-period></div>
+                    </div>
+                  </div>
+                  <div class="date-picker-actions compact-actions">
+                    <button type="button" class="time-picker-cancel secondary-button small-button">Cancel</button>
+                    <button type="button" class="time-picker-ok primary-button small-button">Ok</button>
+                  </div>
+                </div>
+              </div>
             </label>
             <label>
               Duration
